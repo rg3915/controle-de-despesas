@@ -402,3 +402,71 @@ def delete_Customer(request, id: int):
 
 http://localhost:8000/api/v2/docs
 
+## Despesas
+
+```python
+# expense/api.py
+ExpenseSchema = create_schema(Expense)
+
+
+class ExpenseSchemaIn(Schema):
+    due_date: str
+    description: str
+    customer_id: int
+    value: float
+
+@router.get("/expenses", response=List[ExpenseSchema])
+def list_expenses(request):
+    qs = Expense.objects.all()
+    return qs
+
+
+@router.get("/expenses/{id}", response=ExpenseSchema)
+def get_expense(request, id: int):
+    expense = get_object_or_404(Expense, id=id)
+    return expense
+
+
+@router.post("/expenses", response={201: ExpenseSchema})
+def create_expense(request, payload: ExpenseSchemaIn):
+    # Get params
+    due_date = payload.due_date
+    description = payload.description
+    customer_id = payload.customer_id
+    value = payload.value
+
+    # Instance models
+    customer = get_object_or_404(Customer, id=customer_id)
+
+    # Mount dict data
+    data = dict(
+        due_date=due_date,
+        description=description,
+        customer=customer,
+        value=value,
+    )
+
+    # Save data
+    expense = Expense.objects.create(**data)
+
+    return 201, expense
+
+
+@router.put("/expenses/{id}", response=ExpenseSchema)
+def update_expense(request, id: int, payload: ExpenseSchemaIn):
+    expense = get_object_or_404(Expense, id=id)
+
+    for attr, value in payload.dict().items():
+        setattr(expense, attr, value)
+
+    expense.save()
+    return expense
+
+
+@router.delete("/expenses/{id}", response={204: None})
+def delete_expense(request, id: int):
+    expense = get_object_or_404(Expense, id=id)
+    expense.delete()
+    return 204, None
+
+```
