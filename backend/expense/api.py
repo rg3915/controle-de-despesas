@@ -1,3 +1,4 @@
+import json
 from typing import List
 
 from django.shortcuts import get_object_or_404
@@ -30,7 +31,7 @@ def list_customers(request):
 
 
 @router.get('/customers/{id}', response=CustomerSchema)
-def get_Customer(request, id: int):
+def get_customer(request, id: int):
     customer = get_object_or_404(Customer, id=id)
     return customer
 
@@ -38,6 +39,11 @@ def get_Customer(request, id: int):
 @router.post('/customers', response={201: CustomerSchema})
 def create_customer(request, payload: CustomerSchemaIn):
     customer = Customer.objects.create(**payload.dict())
+    # Pegando valores adicionais passados no corpo da requisição.
+    data = json.loads(request.body)
+    a = data.get('a')
+    b = data.get('b')
+    print(a + b)
     return 201, customer
 
 
@@ -46,32 +52,32 @@ def update_customer(request, id: int, payload: CustomerSchemaIn):
     customer = get_object_or_404(Customer, id=id)
 
     for attr, value in payload.dict().items():
-        setattr(Customer, attr, value)
+        setattr(customer, attr, value)
 
     customer.save()
     return customer
 
 
 @router.delete('/customers/{id}', response={204: None})
-def delete_Customer(request, id: int):
+def delete_customer(request, id: int):
     customer = get_object_or_404(Customer, id=id)
     customer.delete()
     return 204, None
 
 
-@router.get("/expenses", response=List[ExpenseSchema])
+@router.get('/expenses', response=List[ExpenseSchema])
 def list_expenses(request):
     qs = Expense.objects.all()
     return qs
 
 
-@router.get("/expenses/{id}", response=ExpenseSchema)
+@router.get('/expenses/{id}', response=ExpenseSchema)
 def get_expense(request, id: int):
     expense = get_object_or_404(Expense, id=id)
     return expense
 
 
-@router.post("/expenses", response={201: ExpenseSchema})
+@router.post('/expenses', response={201: ExpenseSchema})
 def create_expense(request, payload: ExpenseSchemaIn):
     # Get params
     due_date = payload.due_date
@@ -96,7 +102,7 @@ def create_expense(request, payload: ExpenseSchemaIn):
     return 201, expense
 
 
-@router.put("/expenses/{id}", response=ExpenseSchema)
+@router.put('/expenses/{id}', response=ExpenseSchema)
 def update_expense(request, id: int, payload: ExpenseSchemaIn):
     expense = get_object_or_404(Expense, id=id)
 
@@ -107,7 +113,7 @@ def update_expense(request, id: int, payload: ExpenseSchemaIn):
     return expense
 
 
-@router.delete("/expenses/{id}", response={204: None})
+@router.delete('/expenses/{id}', response={204: None})
 def delete_expense(request, id: int):
     expense = get_object_or_404(Expense, id=id)
     expense.delete()

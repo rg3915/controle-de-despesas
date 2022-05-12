@@ -16,9 +16,9 @@ class ExpenseAdmin(admin.ModelAdmin):
         '__str__',
         'customer',
         'value',
-        'paid'
+        'paid',
     )
     list_display_links = ('__str__',)
-    search_fields = ('description', 'customer__name',)
+    search_fields = ('description', 'customer__name')
     list_filter = ('paid',)
     date_hierarchy = 'due_date'
